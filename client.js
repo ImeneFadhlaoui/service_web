@@ -1,5 +1,6 @@
 const soap = require('soap');
 const WSDL_URL = 'http://localhost:8000/calculator?wsdl';
+const TEMP_URL = 'http://localhost:8000/temperature?wsdl';
 
 async function main() {
   try {
@@ -58,6 +59,42 @@ async function main() {
 
   } catch (error) {
     console.error('Erreur de connexion:', error.message);
+  }
+
+try {
+  // Test Puissance
+  const powerResult = await client.PowerAsync({ a: 2, b: 3 });
+  console.log(`Puissance: 2 ^ 3 = ${powerResult[0].result}`);
+
+  // Test Puissance avec exposant négatif
+  console.log('\n--- Test cas: Exposant négatif ---');
+
+  const negPower = await client.PowerAsync({ a: 2, b: -2 });
+  console.log(`Puissance: 2 ^ -2 = ${negPower[0].result}`);
+
+} catch (error) {
+  console.log(
+    '❌ Erreur capturée:',
+    error.root?.Envelope?.Body?.Fault?.Reason?.Text || error.message
+  );
+}
+//Test Temperature 
+try {
+    const tempClient = await soap.createClientAsync(TEMP_URL);
+
+    console.log('\n🌡️ Client Temperature connecté !');
+
+    const cToF = await tempClient.CelsiusToFahrenheitAsync({ celsius: 25 });
+    console.log(`25°C = ${cToF[0].result}°F`);
+
+    const fToC = await tempClient.FahrenheitToCelsiusAsync({ fahrenheit: 100 });
+    console.log(`100°F = ${fToC[0].result}°C`);
+
+    const cToK = await tempClient.CelsiusToKelvinAsync({ celsius: 25 });
+    console.log(`25°C = ${cToK[0].result}K`);
+
+  } catch (error) {
+    console.error('Erreur Temperature:', error.message);
   }
 }
 
